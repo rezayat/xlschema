@@ -1,0 +1,8 @@
+env:
+  ROOT: tests/data
+  SOURCE: ${ROOT}/templates
+  OUTPUT: ${ROOT}/output
+
+recipes:
+  - templates: ${SOURCE}/**/*.py
+    writer: py/djmodels

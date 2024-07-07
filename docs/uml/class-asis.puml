@@ -1,0 +1,95 @@
+@startuml
+Application o-- "*" Converter
+Application o-- "*" SchemaWriter
+Converter --- Schema
+SchemaWriter --- Schema
+SchemaWriter --- Template
+SchemaWriter --- Generator
+Generator o-- "*" Template
+Generator o-- "*" App
+Schema *-- "*" Model
+Schema *-- "*" Enum
+Model *-- "*" Field
+
+
+class Application {
+  +uri: str
+  +options: dict
+  +writer_types: List[str]
+  +writers: List[SchemaWriter]
+  +converter: Converter
+  +schema: Schema
+  ' methods
+  +run(writer_type)
+  +write(writer_type)
+  +populate(writer_type)
+  +get_converter(uri, options) : Converter
+  +get_writer(writer_type) : Writer
+}
+
+class Converter {
+  +uri : str
+  +schema: Schema
+  +options: dict
+  ' methods
+  +preprocess()
+  +process()
+  +postprocess()
+}
+
+class SchemaWriter {
+  +schema: Schema
+  +options: dict
+  ' methods
+  +run()
+  +write()
+}
+
+class Generator {
+  +nspace: dict
+  +options: dict
+  +entries: List[App]
+  ' methods
+  +generate()
+}
+
+class App {
+  +nspace: dict
+  +options: dict
+  ' methods
+  +generate()
+}
+
+class Schema {
+  +name : str
+  +models : List[Model]
+  +enums : List[Enum]
+  +metadata : dict
+}
+
+class Model {
+  +name : str
+  +fields : List[Field]
+  +properties : dict
+  +metadata : dict
+  +data : List[Tuple]
+}
+
+class Field {
+  +name : str
+  +type : str
+  +length : int
+  +index : str
+  +required : bool
+  +default : str
+  +constraint : str
+  +category : str
+  +action : str
+  +description : str
+}
+
+class Enum {
+  +name : str
+  +data : List[Tuple]
+}
+@enduml

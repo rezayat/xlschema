@@ -1,0 +1,95 @@
+---
+title: ${data.schema.name}
+author: robot <robot@me.org>
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output: pdf_document
+---
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+library('RPostgreSQL')
+library('data.table')
+library('xtable')
+library('pander')
+
+drv = dbDriver("PostgreSQL")
+
+con = dbConnect(drv,
+    user='${data.config.db_uri.username}',
+    password='${data.config.db_uri.password}',
+    dbname='${data.config.db_uri.database}',
+    host='${data.config.db_uri.host}',
+    port='${data.config.db_uri.port}')
+
+sql = function(query, ...) {
+    n = length(list(...))
+    if (n > 0) {
+        data.table(dbGetQuery(con, sprintf(query, ...)))
+    } else {
+        data.table(dbGetQuery(con, query))
+    }
+}
+thousands = function(series) format(series, big.mark=",", scientific=FALSE)
+
+```
+
+
+# Data Model Report
+
+
+```{r}
+% for model in data.schema.models:
+% if model.has_sk:
+${model.name} = setkey(sql("select * from ${model.name}"), ${model.sk_field.name})
+% else:
+${model.name} = sql("select * from ${model.name}")
+% endif
+% endfor
+```
+
+% for model in data.schema.models:
+
+${model.name}
+-------------
+
+The `${model.name}` table is defined as follows:
+
+```sql
+drop table if exists ${model.name} cascade;
+create table ${model.name}
+(
+    % for definition in model.definitions:
+    ${definition}
+    % endfor
+);
+```
+
+In summary, `${model.name}` has the following totals
+
+```{r}
+% for field in model.number_fields:
+${field.name}_total = ${model.name}[, sum(${field.name})]
+% endfor
+```
+% for field in model.number_fields:
+${field.name}_total = `r thousands(${field.name}_total)`
+% endfor
+
+
+And the following summary statistics:
+
+% for field in model.number_fields:
+```{r}
+summary(${model.name}[,${field.name}])
+```
+##
+% endfor
+
+
+With the following sample content:
+
+```{r results='asis'}
+pandoc.table(${model.name})
+```
+
+
+% endfor

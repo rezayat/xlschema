@@ -1,0 +1,17 @@
+{% extends "${path}/base_${name}.html" %}
+
+{% load crispy_forms_tags %}
+
+{% block css %}
+    <link rel="stylesheet" type="text/css" href="/static/css/forms.css">
+{% endblock %}
+
+{% block breadcrumb_entry %}
+    <li><a href="{% url '${url_detail}' object.id %}">{{${name}}}</a> <span class="divider">/</span></li>
+    <li class="active">Update ${classname}</li>
+{% endblock %}
+
+{% block main_content %}
+	<h3>Update ${classname}</h3>
+	{% crispy form %}
+{% endblock %}

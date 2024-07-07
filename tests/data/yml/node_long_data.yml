@@ -1,0 +1,87 @@
+enums:
+
+  - name: status
+    data:
+
+      - key: created
+        value: Created
+
+      - key: open
+        value: Open
+
+      - key: finished
+        value: Finished
+
+      - key: closed
+        value: Closed
+
+models:
+  - name: node
+    properties:
+      app: app.core
+      model: app.core.models.Node
+
+    fields:
+      - action:
+        description: node id
+        category:
+        constraint:
+        default:
+        required: true
+        index: pk
+        length:
+        type: int
+        name: id
+
+      - action:
+        description: node parent
+        category:
+        constraint:
+        default:
+        required:
+        index: fk
+        length:
+        type: int
+        name: parent_id
+
+      - action:
+        description: node name
+        category:
+        constraint:
+        default:
+        required: true
+        index:
+        length: 50
+        type: str
+        name: name
+
+    data:
+      - id: 1
+        parent_id:
+        name: A
+        status: created
+
+      - id: 2
+        parent_id: 1
+        name: B
+        status: open
+
+      - id: 3
+        parent_id: 1
+        name: C
+        status: finished
+
+      - id: 4
+        parent_id: 2
+        name: D
+        status: created
+
+      - id: 5
+        parent_id: 4
+        name: E
+        status: closed
+
+      - id: 6
+        parent_id: 4
+        name: F
+        status: finished

@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+
+{% block breadcrumb %}
+<ul class="breadcrumb">
+    <li><a href="/">Home</a> <span class="divider">/</span></li>
+    % if level > 3:
+    <li><a href="{% url '${parent.parent.url_index}'  %}"> ${parent.parent.title} </a><span class="divider">/</span></li>
+    % endif
+    % if level > 2:
+    <li><a href="{% url '${parent.url_index}'  %}"> ${parent.title} </a><span class="divider">/</span></li>
+    % endif
+    {% block breadcrumb_entry %}
+    {% endblock %}
+</ul>
+{% endblock %}

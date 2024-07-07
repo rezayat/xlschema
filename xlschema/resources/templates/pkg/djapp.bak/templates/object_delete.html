@@ -1,0 +1,20 @@
+{% extends "${path}/base_${name}.html" %}
+
+{% block css %}
+    <link rel="stylesheet" type="text/css" href="/static/css/forms.css">
+{% endblock %}
+
+{% block breadcrumb_entry %}
+    <li><a href="{% url '${url_detail}' ${name}.id %}">{{object}}</a> <span class="divider">/</span></li>
+    <li class="active">Delete ${classname}</li>
+{% endblock %}
+
+{% block main_content %}
+	<h3>Delete ${classname}</h3>
+	<h4>Are you sure?</h4>
+	Are you sure you want to delete the selected ${classname}?
+	{{ object}}
+	<form action="." method="post">{% csrf_token %}
+	    <input type="submit" value="Delete" class="btn" />
+	</form>
+{% endblock %}

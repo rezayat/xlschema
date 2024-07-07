@@ -1,0 +1,282 @@
+models:
+
+  - name: person
+    properties:
+      app: com.acme.person
+      model: com.acme.person.models.Person
+
+    fields:
+      - action:
+        description: person id
+        category:
+        constraint:
+        default:
+        required: 1
+        index: pk
+        length:
+        type: int
+        name: id
+
+      - action:
+        description: person name
+        category: contact
+        constraint:
+        default:
+        required: 1
+        index:
+        length: 10
+        type: str
+        name: name
+
+      - action:
+        description: person age
+        category: contact
+        constraint: check (age > 20)
+        default:
+        required: 1
+        index:
+        length:
+        type: int
+        name: age
+
+      - action:
+        description: person rating
+        category: evaluation
+        constraint: enum
+        default:
+        required: 1
+        index:
+        length: 1
+        type: str
+        name: rating
+
+
+
+    data:
+      #  id, name, age, rating
+      - [1, 'jon', 21, 'A']
+      - [2, 'sue', 45, 'B']
+      - [3, 'kate', 55, 'C']
+      - [4, 'ali', 32, 'D']
+      - [5, 'abdul', 61, 'E']
+      - [6, 'rajiv', 71, 'A']
+
+
+  - name: vehicle
+    properties:
+      app: com.acme.vehicle
+      model: com.acme.vehicle.models.Vehicle
+
+    fields:
+      - action:
+        description: car id
+        category:
+        constraint:
+        default:
+        required: 1
+        index: pk
+        length:
+        type: int
+        name: id
+
+      - action:
+        description: car brand
+        category: info
+        constraint:
+        default:
+        required: 1
+        index: sk
+        length: 10
+        type: txt
+        name: brand
+
+      - action:
+        description: car color
+        category: info
+        constraint: enum
+        default: red
+        required: 1
+        index:
+        length: 20
+        type: str
+        name: color
+
+      - action:
+        description: car category
+        category: info
+        constraint: enum
+        default:
+        required: 1
+        index:
+        length: 10
+        type: str
+        name: category
+
+      - action:
+        description: car size
+        category: spec
+        constraint: enum
+        default:
+        required: 1
+        index:
+        length: 10
+        type: str
+        name: size
+
+      - action:
+        description: tire size
+        category: spec
+        constraint: enum
+        default:
+        required: 1
+        index:
+        length: 10
+        type: str
+        name: tire_size
+
+      - action:
+        description: car price
+        category: spec
+        constraint:
+        default:
+        required:
+        index:
+        length:
+        type: float
+        name: price
+
+      - action:
+        description: assigned to
+        category:
+        constraint:
+        default:
+        required: 1
+        index: fk
+        length:
+        type: int
+        name: person_id
+
+
+
+    data:
+      #  id, brand, color, category, size, tire_size, price, person_id
+      - [1, 'gm', 'red', 'sedan', 'medium', '245-30-17', 10.5, 1]
+      - [2, 'nissan', 'blue', 'sedan', 'medium', '295-45-21', 21.2, 2]
+      - [3, 'toyota', 'yellow', 'suv', 'large', '195-60-17', 31.9, 3]
+      - [4, 'hyundai', 'red', 'suv', 'large', '245-30-17', 42.6, 4]
+      - [5, 'ford', 'blue', 'suv', 'large', '295-45-21', 53.3, 5]
+      - [6, 'mercedes', 'white', 'coupe', 'small', '195-60-17', 100.2, 6]
+      - [7, 'toyota', 'white', 'suv', 'large', '195-60-17', 150, 1]
+
+
+  - name: person_vehicle
+    properties:
+      app: com.acme.person_vehicle
+      model: com.acme.person_vehicle.models.PersonVehicle
+      
+    fields:
+      - action:
+        description: id
+        category:
+        constraint:
+        default:
+        required: 1
+        index: pk
+        length:
+        type: int
+        name: id
+
+      - action:
+        description: person id
+        category:
+        constraint:
+        default:
+        required: 1
+        index: fk
+        length:
+        type: int
+        name: person_id
+
+      - action:
+        description: vehicle id
+        category:
+        constraint:
+        default:
+        required: 1
+        index: fk
+        length:
+        type: int
+        name: vehicle_id
+
+      - action:
+        description: from date
+        category:
+        constraint:
+        default:
+        required: 1
+        index:
+        length:
+        type: date
+        name: from_date
+
+      - action:
+        description: to date
+        category:
+        constraint:
+        default:
+        required: 1
+        index:
+        length:
+        type: date
+        name: to_date
+
+
+
+    data:
+      #  id, person_id, vehicle_id, from_date, to_date
+      - [1, 1, 7, '2016-10-25', '2017-10-25']
+      - [2, 2, 2, '2016-10-25', '2017-10-25']
+      - [3, 3, 3, '2016-10-25', '2017-10-25']
+      - [4, 4, 2, '2016-10-25', '2017-10-25']
+      - [5, 5, 1, '2016-10-25', '2017-10-25']
+      - [6, 6, 6, '2016-10-25', '2017-10-25']
+
+
+
+
+enums:
+  - name: category
+    data:
+      - ['coupe', 'coupe']
+      - ['sedan', 'sedan']
+      - ['suv', 'suv']
+
+  - name: color
+    data:
+      - ['blue', 'blue']
+      - ['red', 'red']
+      - ['orange', 'orange']
+      - ['yellow', 'yellow']
+      - ['green', 'green']
+      - ['white', 'white']
+      - ['black', 'black']
+
+  - name: rating
+    data:
+      - ['A', 'excellent']
+      - ['B', 'very_good']
+      - ['C', 'good']
+      - ['D', 'below_average']
+      - ['E', 'bad']
+
+  - name: tire_size
+    data:
+      - ['245-30-17', 'Low Profile']
+      - ['295-45-21', '4 By 4']
+      - ['195-60-17', 'Standard']
+
+  - name: size
+    data:
+      - ['large', 'large']
+      - ['medium', 'medium']
+      - ['small', 'small']

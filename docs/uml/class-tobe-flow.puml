@@ -1,0 +1,32 @@
+@startuml
+' Input
+class Specfile
+class Database
+
+' SchemaReaders: Spec -> Schema
+class SchemaReader
+
+' Internal Data
+class Schema
+class Template
+
+' Transformers: Schema -> Schema
+'class Transformer
+
+' SchemaWriter: Schema -> Code
+class SchemaWriter
+
+' Output
+class Code
+
+Specfile -- SchemaReader : >
+Database -- SchemaReader : >
+SchemaReader -- Schema : >
+'Schema -- Transformer : >
+'Transformer -- Schema : >
+Schema -- SchemaWriter : >
+Template -- SchemaWriter : >
+SchemaWriter -- Code : >
+
+hide member
+@enduml

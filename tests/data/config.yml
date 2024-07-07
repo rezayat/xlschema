@@ -1,0 +1,25 @@
+color: green
+robot: large
+timeout: 10
+size: 150
+is_true: True
+
+log:
+  disable_existing_loggers: false
+  version: 1
+  formatters:
+    short:
+      format: '%(asctime)s %(levelname)s %(name)s: %(message)s'
+  handlers:
+    console:
+      level: INFO
+      formatter: short
+      class: logging.StreamHandler
+  loggers:
+    default:
+      level: ERROR
+      handlers: [console]
+    plugins:
+      level: INFO
+      handlers: [console]
+      propagate: false

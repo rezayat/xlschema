@@ -1,0 +1,62 @@
+enums:
+  - name: rating
+    data:
+      - [a, A]
+      - [b, B]
+      - [c, C]
+      - [d, D]
+
+models:
+  - name: person
+    fields:
+      - name: id
+        type: str
+        index: pk
+
+      - name: name
+        type: str
+        required: true
+
+      - name: age
+        type: int
+        default: 20
+        required: true
+
+      - name: birthday
+        type: date
+
+      - name: doj
+        type: time
+
+      - name: rating
+        type: str
+        length: 1
+        required: true
+        constraint: enum
+
+    data:
+      - [a, sam, 10, 2011-10-21, !!timestamp '2010-02-11 11:02:57', a]
+      - [b, sue, 20, 2011-10-21, !!timestamp '2010-02-11 11:02:57', b]
+      - [c, joe, 20, 2011-10-21, !!timestamp '2010-02-11 11:02:57', c]
+      - [d, lou, 21, 2011-10-21, !!timestamp '2010-02-11 11:02:57', d]
+      - [e, foo, 30, 2011-10-21, !!timestamp '2010-02-11 11:02:57', d]
+      - [f, bar, 40, 2011-10-21, !!timestamp '2010-02-11 11:02:57', a]
+
+  - name: robot
+    fields:
+      - name: id
+        type: int
+        index: pk
+
+      - name: person_id
+        type: int
+        constraint: on delete cascade on update cascade
+        index: fk
+
+      - name: name
+        type: str
+
+    data:
+      - [1, 1, mo]
+      - [2, 1, jo]
+      - [3, 2, bo]

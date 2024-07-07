@@ -1,0 +1,15 @@
+models:
+  - name: node
+    fields:
+      - name: id
+        type: int
+        index: pk
+
+      - name: parent_id
+        type: int
+        index: fk
+
+      - name: name
+        type: str
+        length: 50
+        required: true

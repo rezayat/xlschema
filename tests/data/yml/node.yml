@@ -1,0 +1,37 @@
+enums:
+  - name: status
+    data:
+      - [created,  Created]
+      - [open,     Open]
+      - [finished, Finished]
+      - [closed,   Closed]
+
+models:
+  - name: node
+    fields:
+      - name: id
+        type: int
+        index: pk
+
+      - name: parent_id
+        type: int
+        index: fk
+
+      - name: name
+        type: str
+        length: 50
+        required: true
+
+      - name: status
+        type: str
+        length: 10
+        required: true
+        constraint: enum
+
+    data:
+      - [1, null, A, created]
+      - [2, 1,    B, open]
+      - [3, 1,    C, finished]
+      - [4, 2,    D, created]
+      - [5, 4,    E, closed]
+      - [6, 4,    F, finished]

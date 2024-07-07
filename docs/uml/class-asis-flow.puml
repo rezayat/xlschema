@@ -1,0 +1,25 @@
+@startuml
+' Input
+class Specfile
+class Database
+
+' Internal Data
+class Schema
+class Template
+
+' Processors
+class Converter
+class SchemaWriter
+
+' Output
+class Code
+
+Specfile -- Converter : >
+Database -- Converter : >
+Converter -- Schema : >
+Schema -- SchemaWriter : >
+Template -- SchemaWriter : >
+SchemaWriter -- Code : >
+
+hide member
+@enduml

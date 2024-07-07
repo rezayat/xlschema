@@ -1,0 +1,88 @@
+@startuml
+Application o-- "*" SchemaReader
+Application o-- "*" SchemaWriter
+SchemaReader --- Schema
+SchemaWriter --- Schema
+SchemaWriter o-- "*" Template
+Schema *-- "*" Model
+Schema *-- "*" Enum
+Model *-- "*" Field
+Model --- Namespace
+
+
+class Application {
+  +uri: str
+  +options: dict
+  +writer_types: List[str]
+  +writers: List[SchemaWriter]
+  +reader: SchemaReader
+  +schema: Schema
+  ' methods
+  +run(writer_type)
+  +write(writer_type)
+  +populate(writer_type)
+  +get_reader(uri, options) : SchemaReader
+  +get_writer(writer_type) : SchemaWriter
+}
+
+class SchemaReader {
+  +uri : str
+  +schema: Schema
+  +options: dict
+  ' methods
+  +preprocess()
+  +process()
+  +postprocess()
+}
+
+class SchemaWriter {
+  +schema: Schema
+  +options: dict
+  +children: List[SchemaWriter]
+  ' methods
+  +run()
+  +write()
+}
+
+class Schema {
+  +name : str
+  +models : List[Model]
+  +enums : List[Enum]
+  +metadata : dict
+}
+
+class Model {
+  +name : str
+  +fields : List[Field]
+  +properties : dict
+  +metadata : dict
+  +data : List[Tuple]
+  --
+  +nspace : Namespace
+}
+
+class Namespace {
+  +nspace : dict
+}
+
+class Field {
+  +name : str
+  +type : str
+  +length : int
+  +index : str
+  +required : bool
+  +default : str
+  +constraint : str
+  +category : str
+  +action : str
+  +description : str
+}
+
+class Enum {
+  +name : str
+  +data : List[Tuple]
+}
+
+
+
+@enduml

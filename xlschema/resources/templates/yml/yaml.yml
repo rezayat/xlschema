@@ -1,0 +1,46 @@
+<%!
+    def rn(value):
+      if value:
+        return value
+      return ''
+%>
+models:
+
+  % for model in data.schema.models:
+  - name: ${model.name}
+    properties:
+      % for key, value in model.properties.items():
+      ${key}: ${value}
+      % endfor
+
+    fields:
+      % for field in model.fields:
+      - name: ${field.name}
+        type: ${field.ftype}
+        length: ${rn(field.length)}
+        index: ${rn(field.index)}
+        required: ${rn(field.required)}
+        default: ${rn(field.default)}
+        constraint: ${rn(field.constraint)}
+        category: ${rn(field.category)}
+        action: ${rn(field.action)}
+        description: ${rn(field.description)}
+        
+      % endfor
+
+    data:
+      % if model.data:
+      % for row in model.data:
+      - ${list(row)}
+      % endfor
+      % endif
+  % endfor
+
+enums:
+  % for name in data.schema.enums:
+  - name: ${name}
+    data:
+      % for row in data.schema.enums[name].items():
+      - ${list(row)}
+      % endfor
+  % endfor

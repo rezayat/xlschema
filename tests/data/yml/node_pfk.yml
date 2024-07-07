@@ -1,0 +1,77 @@
+enums:
+
+  - name: status
+    data:
+      - [created,  Created]
+      - [open,     Open]
+      - [finished, Finished]
+      - [closed,   Closed]
+
+models:
+  - name: node
+    properties:
+      app: app.node
+      model: app.node.models.Node
+
+    fields:
+      - description: node id
+        required: true
+        index: pk
+        type: int
+        name: id
+
+      - description: node parent
+        index: fk
+        type: int
+        name: parent_id
+
+      - description: node name
+        required: true
+        length: 50
+        type: str
+        name: name
+        action: noprefix
+
+      - description: node status
+        constraint: enum
+        required: true
+        length: 10
+        type: str
+        name: status
+
+    data:
+      - [1, null, A, created]
+      - [2, 1,    B, open]
+      - [3, 1,    C, finished]
+      - [4, 2,    D, created]
+      - [5, 4,    E, closed]
+      - [6, 4,    F, finished]
+
+  - name: nodedata
+    properties:
+      app: app.nodedata
+      model: app.nodedata.models.NodeData
+
+    fields:
+      - name: node_id
+        type: int
+        index: pfk
+        required: true
+        description: nodedata id
+
+      - name: name
+        type: str
+        description: nodedata name
+
+      - name: age
+        type: int
+        default: 5
+        description: nodedata age
+
+    data:
+      - [1, A, 1]
+      - [2, B, 2]
+      - [3, C, 5]
+      - [4, D, 5]
+      - [5, E, 5]
+      - [6, F, 6]

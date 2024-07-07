@@ -1,0 +1,41 @@
+@startuml
+Schema o-- Model
+Schema o-- Enum
+Model  o-- Field
+
+class Field {
+  +name : str
+  +type : str
+  +length : int
+  +index : str
+  +required : bool
+  +default : str
+  +constraint : str
+  +category : str
+  +action : str
+  +description : str
+  - model : Model
+}
+
+class Schema {
+  +name : str
+  +models : List[Model]
+  +enums : List[Enum]
+  -metadata : dict
+}
+
+class Model {
+  +name : str
+  +fields : List[Field]
+  +properties : dict
+  -metadata : dict
+  +data : List[Tuple]
+}
+
+class Enum {
+  +name : str
+  +data : List[Tuple]
+}
+
+' hide members
+@enduml

@@ -1,0 +1,24 @@
+{% extends "${path}/base_${name}.html" %}
+
+{% load core_tags %}
+{% load crispy_forms_tags %}
+
+{% block breadcrumb_entry %}
+    <li><a href="{% url '${url_list}' %}">${title_plural}</a> <span class="divider">/</span></li>
+    <li class="active">{{object.name}}</li>
+{% endblock %}
+
+{% block main_content %}
+
+	{% block actions %}
+		<a class="btn" href="{% url '${url_update}' object.id %}"><i class="icon-edit"></i> Update</a>
+		<a class="btn" href="{% url '${url_delete}' object.id %}"><i class="icon-remove-sign"></i> Delete</a>
+	{% endblock %}
+
+    <hr/>
+
+    <div class="container">
+    {% crispy form %}
+    </div>
+
+{% endblock %}

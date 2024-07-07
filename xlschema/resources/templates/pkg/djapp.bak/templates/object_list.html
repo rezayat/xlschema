@@ -1,0 +1,43 @@
+{% extends "${path}/base_${name}.html" %}
+
+{% block css %}
+<link rel="stylesheet" type="text/css" href="/static/css/DT_bootstrap.css">
+{% endblock %}
+
+{% block breadcrumb_entry %}
+    <li class="active">${title_plural}</li>
+{% endblock %}
+
+{% block main_content %}
+{% block actions %}
+    <a class="btn" href="{% url '${url_create}' %}"><i class="icon-plus-sign"></i> Add ${classname} </a>
+{% endblock %}
+<hr/>
+<div class="container">
+	<h3>${title_plural}</h3>
+	<table class="table table-bordered table-condensed" id="sortable-table">
+		<thead>
+			<tr>
+				<th>Name</th>
+            % if list_display:
+            % for obj in list_display:
+				<th>$obj.title</th>
+            % endfor
+            % endif
+			</tr>
+		</thead>
+		<tbody>
+			{% for object in object_list %}
+			<tr>
+	           <td><a href="{% url '${url_detail}' object.id %}">{{object.name}}</a></td>
+               % if list_display:
+               % for obj in list_display:
+               <td>{{object.$obj}}</td>
+               % endfor
+               % endif
+			</tr>
+			{% endfor %}
+		</tbody>
+	</table>
+</div>
+{% endblock %}

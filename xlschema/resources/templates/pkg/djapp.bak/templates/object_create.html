@@ -1,0 +1,24 @@
+<!--FIXME-->
+{% extends "${path}/base_${name}.html" %}
+
+{% load crispy_forms_tags %}
+
+{% block css %}
+    <link rel="stylesheet" type="text/css" href="/static/css/datepicker.css">
+{% endblock %}
+
+{% block js %}
+{% endblock %}
+
+{% block breadcrumb_entry %}
+    <li><a href="{% url '${url_list}' %}">${title_plural}</a> <span class="divider">/</span></li>
+    <li class="active"> Create ${title}</li>
+{% endblock %}
+
+{% block css %}
+    <link rel="stylesheet" type="text/css" href="/static/css/forms.css">
+{% endblock %}
+
+
+{% block main_content %}
+{% endblock %}

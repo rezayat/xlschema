@@ -1,0 +1,24 @@
+<!--FIXME-->
+{% extends "${model.nspace.path}/base_${model.name}.html" %}
+
+{% load crispy_forms_tags %}
+
+{% block css %}
+    <link rel="stylesheet" type="text/css" href="/static/css/datepicker.css">
+{% endblock %}
+
+{% block js %}
+{% endblock %}
+
+{% block breadcrumb_entry %}
+    <li><a href="{% url '${model.nspace.url_list}' %}">${model.nspace.app_name_plural}</a> <span class="divider">/</span></li>
+    <li class="active"> Create ${model.nspace.model_classname_plural_title}</li>
+{% endblock %}
+
+{% block css %}
+    <link rel="stylesheet" type="text/css" href="/static/css/forms.css">
+{% endblock %}
+
+
+{% block main_content %}
+{% endblock %}

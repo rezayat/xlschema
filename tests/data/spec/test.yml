@@ -1,0 +1,9 @@
+- app: com.acme.person
+  model: com.acme.person.models.Person
+  list_display: [id, name]
+  search_fields: [name]
+
+- app: com.acme.vehicle
+  model: com.acme.vehicle.models.Vehicle
+  list_display: [id, brand, category, price]
+  search_fields: [brand, category]
