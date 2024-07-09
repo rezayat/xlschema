@@ -86,7 +86,7 @@ test-html:
 # -----------------------------------------------------------------------
 .PHONY: clean clean-pyc clean-output clean-tests clean-docs clean-build
 
-clean: clean-pyc clean-output clean-tests clean-docs clean-build
+clean: clean-pyc clean-output clean-tests clean-build #clean-docs 
 	$(call section,"cleaning DONE")
 
 clean-pyc:
@@ -113,7 +113,7 @@ clean-tests:
 
 clean-output:
 	$(call section,"cleaning output files")
-	@rm -rf .xlschema/data/output/*
+	@rm -rf .xlschema
 	@rm -rf tests/data/output/*
 	@rm -rf ./output
 

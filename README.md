@@ -9,8 +9,11 @@ Installation
 ```
 $ git clone https://github.com/rezayat/xlschema.git
 $ cd xlschema
-$ source ./scripts/mkvenv.sh
+$ rye sync
+$ source .venv/bin/activate
 ```
+
+xlschema uses [rye](https://rye.astral.sh/guide/) as development tool.
 
 View the [YAML](http://yaml.org) at `tests/data/yml/node.yml` using your preferred text editor:
 

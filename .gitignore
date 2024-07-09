@@ -43,3 +43,6 @@ wheels/
 
 # mypy / ruff / etc..
 .*_cache
+
+# rye
+*.lock
