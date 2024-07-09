@@ -17,25 +17,8 @@ check: pylint flake8 radon proselint
 
 pylint:
 	$(call section,"running pylint")
-	@python3 -m pylint xlschema
+	@python3 -m pylint src/xlschema
 
-flake8:
-	$(call section,"running flake8")
-	@flake8 xlschema
-
-radon:
-	$(call section,"radon")
-	@radon cc --ignore "tests,docs,resources" --min C xlschema
-
-proselint:
-	$(call section,"proselint")
-	@proselint README.md
-	@proselint docs/userguide.rst
-	@proselint docs/devguide.rst
-
-pyroma:
-	$(call section,"running pyroma")
-	@pyroma .
 
 # DOCS
 # -----------------------------------------------------------------------
@@ -58,27 +41,19 @@ pdf:
 
 # STYLING
 # -----------------------------------------------------------------------
-.PHONY: style isort yapf autopep8
+.PHONY: style isort
 
 style: isort
 
 isort:
 	$(call section,"isort")
-	@isort --recursive xlschema/common
-	@isort --recursive xlschema/ext
-	@isort --recursive xlschema/fields
-	@isort --recursive xlschema/plugins
-	@isort --recursive xlschema/readers
-	@isort --recursive xlschema/writers
-	@isort xlschema/*.py
-
-yapf:
-	$(call section,"styling tests with yapf")
-	@yapf -ir tests
-
-autopep8:
-	$(call section,"styling tests with autopep8")
-	@autopep8 -ir tests
+	@isort --recursive src/xlschema/common
+	@isort --recursive src/xlschema/ext
+	@isort --recursive src/xlschema/fields
+	@isort --recursive src/xlschema/plugins
+	@isort --recursive src/xlschema/readers
+	@isort --recursive src/xlschema/writers
+	@isort src/xlschema/*.py
 
 # TESTING
 # -----------------------------------------------------------------------
@@ -142,33 +117,3 @@ clean-output:
 	@rm -rf tests/data/output/*
 	@rm -rf ./output
 
-
-# REPORTING CODE METRICS
-# -----------------------------------------------------------------------
-.PHONY: cloc cloc-app cloc-tests
-
-cloc: cloc-app cloc-tests
-
-cloc-app:
-	$(call section,"cloc of app")
-	@cloc --exclude-dir=docs,tests,data .
-
-cloc-tests:
-	$(call section,"cloc of tests")
-	@cloc tests
-
-
-# DEPLOYING
-# -----------------------------------------------------------------------
-.PHONY: dist
-
-dist: clean
-	$(call section,"building sdist / wheels")
-	@python3 setup.py sdist
-	@python3 setup.py bdist_wheel
-	@ls -l dist
-
-bump:
-	$(call section,"bumping patch version and pushing")
-	@bumpversion patch
-	@git push

@@ -1,7 +1,9 @@
 
+# macos
 .DS_Store
 
 # application output
+.xlschema
 /tests/data/output/*
 /tests/data/logs/*.log
 output
@@ -22,11 +24,12 @@ __pycache__/
 # Distribution / packaging
 /build/
 /dist/
-*.egg-info/
+wheels/
+*.egg-info
 .eggs/
 
 # Unit test / coverage reports
-.pytest_cache
+# .pytest_cache
 .coverage
 .coverage.*
 .cache
@@ -38,5 +41,5 @@ __pycache__/
 .venv
 /venv/
 
-# mypy
-.mypy_cache/
+# mypy / ruff / etc..
+.*_cache

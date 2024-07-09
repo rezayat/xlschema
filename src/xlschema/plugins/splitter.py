@@ -71,16 +71,16 @@ class XLSplitter(mixins.ToExcelMixin):
         """Load and read workbook to be split."""
         self.log.debug('reading: %s', self.path)
         self.workbook = openpyxl.load_workbook(self.path)
-        for name in self.workbook.get_sheet_names():
+        for name in self.workbook.sheetnames:
             if name == self.target_sheet:
-                sheet = self.workbook.get_sheet_by_name(name)
+                sheet = self.workbook[name]
                 self.col_index = self._get_col_index(sheet)
                 self.log.debug('column index: %s', self.col_index)
                 self.read_sheet(sheet)
 
             if self.keep_sheets:
                 if name not in self.keep_sheets:
-                    sheet = self.workbook.get_sheet_by_name(name)
+                    sheet = self.workbook[name]
                     self.workbook.remove_sheet(sheet)
 
         if not os.path.exists(self.output):
@@ -97,7 +97,7 @@ class XLSplitter(mixins.ToExcelMixin):
         for name in sorted(self.datasets.keys()):
             outfile = os.path.join(self.output, '{}.xlsx'.format(name))
             self.workbook = openpyxl.load_workbook(self.tempfile)
-            sheet = self.workbook.get_sheet_by_name(self.target_sheet)
+            sheet = self.workbook[self.target_sheet]
             rows = self.datasets[name]
             for i, row in enumerate(rows, 1):
                 for j, value in enumerate(row, 1):

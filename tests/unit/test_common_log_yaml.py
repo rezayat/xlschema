@@ -66,6 +66,6 @@ def test_dictconfig():
     log = logging.getLogger()
     log.info('This is a info msg')
     log.debug('This is a debug msg')
-    log.warn('This is a warning msg')
+    log.warning('This is a warning msg')
     log.error('This is an error')
     log.critical('This is a critical error')

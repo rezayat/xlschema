@@ -28,7 +28,9 @@ class Config:
     # OUTPUT = ROOT / 'tests' / 'data' / 'output'
 
     LOCAL_DIR = Path('.xlschema')
-    LOCAL_OUTPUT = str(LOCAL_DIR / 'data' / 'output')
+    LOCAL_OUTPUT = LOCAL_DIR / 'data' / 'output'
+    LOCAL_OUTPUT.mkdir(parents=True, exist_ok=True)
+    LOCAL_OUTPUT = str(LOCAL_OUTPUT)
 
     DB_URI = os.getenv('DB_URI', 'sqlite:///tests/data/db/test.sqlite')
     db_uri = make_url(DB_URI)

@@ -45,7 +45,8 @@ class ExcelToModel(abstract.SchemaReader):
         nargs = lambda col: '{}{}'.format(col, self.n_args)
 
         for name in self.workbook.sheetnames:
-            sheet = self.workbook.get_sheet_by_name(name)
+            # sheet = self.workbook.get_sheet_by_name(name)
+            sheet = self.workbook[name]
 
             if name == self.config.ENUMS_SHEET:
                 enum_sheet = sheets.EnumSheet(sheet, self.options)
