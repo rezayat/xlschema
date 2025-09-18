@@ -17,7 +17,7 @@ check: pylint flake8 radon proselint
 
 pylint:
 	$(call section,"running pylint")
-	@python3 -m pylint src/xlschema
+	@uv run python -m pylint src/xlschema
 
 
 # DOCS
@@ -47,39 +47,39 @@ style: isort
 
 isort:
 	$(call section,"isort")
-	@isort --recursive src/xlschema/common
-	@isort --recursive src/xlschema/ext
-	@isort --recursive src/xlschema/fields
-	@isort --recursive src/xlschema/plugins
-	@isort --recursive src/xlschema/readers
-	@isort --recursive src/xlschema/writers
-	@isort src/xlschema/*.py
+	@uv run isort --recursive src/xlschema/common
+	@uv run isort --recursive src/xlschema/ext
+	@uv run isort --recursive src/xlschema/fields
+	@uv run isort --recursive src/xlschema/plugins
+	@uv run isort --recursive src/xlschema/readers
+	@uv run isort --recursive src/xlschema/writers
+	@uv run isort src/xlschema/*.py
 
 # TESTING
 # -----------------------------------------------------------------------
 .PHONY: test test-full test-fast test-time coverage
 
-test: test-fast
+test: test-full
 
 coverage:
 	$(call section,"coverage")
-	@pytest --cov-report html:docs/coverage --cov=xlschema
+	@uv run pytest --cov-report html:docs/coverage --cov=xlschema
 
 test-full:
 	$(call section,"test all")
-	@pytest
+	@uv run pytest
 
 test-fast:
 	$(call section,"test skipping slowest tests")
-	@pytest -k-slow
+	@uv run pytest -k-slow
 
 test-time:
 	$(call section,"test all with top 20 slowest tests")
-	@pytest --durations=20
+	@uv run pytest --durations=20
 
 test-html:
 	$(call section,"test all with html report")
-	@pytest --html=docs/test-report.html --self-contained-html
+	@uv run pytest --html=docs/test-report.html --self-contained-html
 
 
 # CLEANING

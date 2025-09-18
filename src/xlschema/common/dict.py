@@ -78,6 +78,22 @@ def easy_options(options, kwds: dict) -> Objdict:
             raise TypeError("options type not recognized")
     else:
         options = Objdict()
+
+    # Set default values for common options used by templates
+    defaults = {
+        'models_only': False,
+        'clean': False,
+        'update_only': False,
+        'run': False,
+        'populate': False,
+        'view': False
+    }
+
+    # Apply defaults first, then user-provided options
+    for key, default_value in defaults.items():
+        if not hasattr(options, key) or getattr(options, key) is None:
+            setattr(options, key, default_value)
+
     options.update(kwds)
     return options
 

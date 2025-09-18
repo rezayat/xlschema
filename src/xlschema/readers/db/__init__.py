@@ -5,8 +5,8 @@ from collections import OrderedDict
 from .. import abstract
 from ... import models
 
-from sqlalchemy import MetaData, create_engine
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy import MetaData, create_engine, text
+from sqlalchemy.orm import sessionmaker, Session
 
 
 # ----------------------------------------------------------
@@ -51,10 +51,11 @@ class DBToModel(abstract.SchemaReader):
                     field['default'] = col.default  # pragma: no cover
                 model.fields.append(self.field_class.from_dict(field))
 
-            rows = self.engine.execute(table.select())
-            for row in rows:
-                cleaned_row = model.row_clean(row)
-                model.data.append(cleaned_row)
+            with self.engine.connect() as conn:
+                result = conn.execute(table.select())
+                for row in result:
+                    cleaned_row = model.row_clean(row)
+                    model.data.append(cleaned_row)
             self.schema.models.append(model)
 
         self.post_process(model_names)
@@ -69,7 +70,7 @@ class SqlToModel(abstract.SchemaReader):
         self.engine = create_engine(self.uri)
         self.meta = MetaData()
         self.meta.reflect(bind=self.engine)
-        self.session_factory = sessionmaker(bind=self.engine)
+        self.session_factory = sessionmaker(self.engine)
 
     def populate(self, counter, sql, rows):
         """Populate main models from sql statement and its query results.
@@ -119,7 +120,7 @@ class SqlToModel(abstract.SchemaReader):
             try:
                 session = self.session_factory()
                 self.log.debug('sql: %s', validated_sql)
-                rows = session.execute(validated_sql)
+                rows = session.execute(text(validated_sql))
                 self.populate(i, validated_sql, rows)
                 session.commit()
             except Exception as e:

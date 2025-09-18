@@ -6,7 +6,7 @@ from sqlalchemy import Column, ForeignKey, Enum
 from sqlalchemy import (Float, Integer, String, Text, Boolean,
                         Date, Time, Interval)
 from sqlalchemy.orm import relationship, sessionmaker
-from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import declarative_base
 from contextlib import contextmanager
 
 DBI_URI = os.getenv('DBI_URI', '${data.config.DB_URI}')
@@ -31,7 +31,7 @@ class DeclarativeBase(object):
             if key == 'id' or key.startswith('_'):
                 continue
             else:
-                if dikt.has_key(key):
+                if key in dikt:
                     kwds[key] = dikt[key]
                 else:
                     kwds[key] = None
@@ -42,10 +42,9 @@ class DeclarativeBase(object):
 
 Base = declarative_base(cls=DeclarativeBase)
 metadata = Base.metadata
-metadata.bind = engine
 
 # create session
-Session = sessionmaker(bind=engine)
+Session = sessionmaker(engine)
 
 @contextmanager
 def session_scope():
@@ -64,7 +63,8 @@ def sql(self, sql_string, *args, **kwds):
     """unsafe helper to retrieve objects from sql
     """
     with session_scope() as session:
-        return session.execute(sql_string.format(*args, **kwds))
+        from sqlalchemy import text
+        return session.execute(text(sql_string.format(*args, **kwds)))
 
 
 % for model in data.schema.models:

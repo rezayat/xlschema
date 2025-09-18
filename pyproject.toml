@@ -12,7 +12,7 @@ dependencies = [
     "mako>=1.3.10",
     "openpyxl>=3.1.5",
     "pyyaml>=6.0.2",
-    "sqlalchemy==1.4.54",
+    "sqlalchemy==2.0.43",
 ]
 
 [dependency-groups]
@@ -34,7 +34,10 @@ dev = [
 [tool.pytest.ini_options]
 pythonpath = ["src"]
 testpaths = ["tests"]
-
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+    "serial",
+]
 
 [build-system]
 requires = ["uv_build>=0.8.18,<0.9.0"]

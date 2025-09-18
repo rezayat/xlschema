@@ -206,12 +206,24 @@ class TemplateWriter(SchemaWriter):
                 )
             return True
 
-        # Allow specific xlschema model classes
+        # Allow specific xlschema model classes and objects
         if hasattr(value, '__class__'):
             class_name = value.__class__.__name__
-            safe_classes = {'Schema', 'Model', 'Enum', 'Field', 'Text'}
+            module_name = getattr(value.__class__, '__module__', '')
+
+            # Allow xlschema model classes
+            safe_classes = {'Schema', 'Model', 'Enum', 'Field', 'Text', 'Config'}
             if class_name in safe_classes:
                 return True
+
+            # Allow xlschema objects (by module)
+            if module_name and module_name.startswith('xlschema.'):
+                safe_modules = {
+                    'xlschema.common.dict', 'xlschema.config', 'xlschema.models',
+                    'xlschema.fields', 'xlschema.common.text'
+                }
+                if any(module_name.startswith(mod) for mod in safe_modules):
+                    return True
 
         return False
 
