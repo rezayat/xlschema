@@ -1,21 +1,52 @@
-# xlschema: generate model code from xlsx/yaml files
+# XLSchema: Modern Relational Model Code Generator
 
-**xlschema** is a python 3 tool and library which generates boilerplate code for relational database models from YAML files, MS Excel templates or directly from database connections.
+[![Python Version](https://img.shields.io/badge/python-3.12+-blue.svg)](https://python.org)
+[![SQLAlchemy](https://img.shields.io/badge/sqlalchemy-2.0.43-green.svg)](https://sqlalchemy.org)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-## Quickstart
+**XLSchema** is a powerful Python 3 framework for generating boilerplate code for relational database models from multiple input sources. Convert YAML specifications, Excel templates, or existing database schemas into 25+ target formats including SQL, Python frameworks (Django, SQLAlchemy), Haskell, Java Hibernate, and more.
 
-Installation
+---
 
-```
-$ git clone https://github.com/rezayat/xlschema.git
-$ cd xlschema
-$ uv sync
-$ source .venv/bin/activate
-```
+## Table of Contents
 
-xlschema uses [uv](https://github.com/astral-sh/uv) as development tool.
+- [Features](#features)
+- [Quick Start](#quick-start)
+- [Installation](#installation)
+- [Usage Examples](#usage-examples)
+  - [From YAML/Excel Files](#from-yamlexcel-files)
+  - [From Database Connections](#from-database-connections)
+  - [API Usage](#api-usage)
+- [Command Line Interface](#command-line-interface)
+- [Supported Formats](#supported-formats)
+- [Configuration](#configuration)
+- [Architecture](#architecture)
+- [Security Features](#security-features)
+- [Recent Updates](#recent-updates)
+- [Contributing](#contributing)
+- [Documentation](#documentation)
+- [License](#license)
 
-View the [YAML](http://yaml.org) at `tests/data/yml/node.yml` using your preferred text editor:
+---
+
+## Features
+
+- **Multi-Source Input**: YAML files, Excel spreadsheets, or direct database connections
+- **25+ Output Formats**: SQL dialects, Python frameworks, documentation, and more
+- **Round-Trip Conversion**: Bidirectional conversion between formats
+- **Enterprise Security**: Input validation, SQL injection prevention, secure command execution
+- **Modern Stack**: SQLAlchemy 2.0, Python 3.12+, secure subprocess handling
+- **Plugin Architecture**: Extensible framework for custom readers and writers
+- **Rich Data Types**: Support for enums, relationships, constraints, and metadata
+- **Template-Based**: Customizable Mako templates for code generation
+
+---
+
+## Quick Start
+
+### Basic Example
+
+1. **Create a schema** (`schema.yml`):
 
 ```yaml
 enums:
@@ -52,73 +83,43 @@ models:
       - [1, null, A, created]
       - [2, 1,    B, open]
       - [3, 1,    C, finished]
-      - [4, 2,    D, created]
-      - [5, 4,    E, closed]
-      - [6, 4,    F, finished]
-
 ```
 
-Now with the virtualenv environment activated and from the root of the `xlschema` directory run the following:
+2. **Generate SQL**:
 
+```bash
+python -m xlschema from_uri --format=sql/postgres schema.yml
 ```
-$ python3 -m xlschema from_uri --format=sql/pgenum tests/data/yml/node.yml
-```
 
-You should see some log information about a file being generated. Now view the file, `node_pgenum.sql`, in `./tests/data/output`:
-
+**Output** (`schema_postgres.sql`):
 ```sql
-
-drop type status cascade;
-create type status as enum (
+DROP TYPE IF EXISTS status CASCADE;
+CREATE TYPE status AS ENUM (
     'created',
     'open',
     'finished',
     'closed'
 );
 
-drop table if exists node cascade;
-create table node
-(
-    id integer primary key,
-    parent_id integer references node (id),
-    name varchar(50) not null,
-    status status not null
+DROP TABLE IF EXISTS node CASCADE;
+CREATE TABLE node (
+    id INTEGER PRIMARY KEY,
+    parent_id INTEGER REFERENCES node (id),
+    name VARCHAR(50) NOT NULL,
+    status status NOT NULL
 );
-
-
--- node DATA
--- ---------------------------------------------------------------
-COPY node (id, parent_id, name, status) FROM stdin;
-1	\N	A	created
-2	1	B	open
-3	1	C	finished
-4	2	D	created
-5	4	E	closed
-6	4	F	finished
-\.
-
 ```
 
-If you have `postgres`, you can test that this generated sql works by doing something similar to this (with the appropriate connection info):
+3. **Generate Django Models**:
 
-```
-$ psql -f node_pgenum.sql
-```
-
-Now, let's try another format, and run xlschema to generate a django models file:
-
-```
-$ python3 -m xlschema from_uri --format=py/djmodels tests/data/yml/node.yml
+```bash
+python -m xlschema from_uri --format=py/djmodels schema.yml
 ```
 
-You should see a file called `node_djmodels.py` in the output directory:
-
+**Output** (`schema_djmodels.py`):
 ```python
-from datetime import datetime
 from django.db import models
 
-# NODE
-# ----------------------------------------------------------
 STATUS = [
     ("created", "Created"),
     ("open", "Open"),
@@ -127,122 +128,338 @@ STATUS = [
 ]
 
 class Node(models.Model):
-    id = models.IntegerField(blank=False, null=False, primary_key=True)
-    parent = models.ForeignKey("self", blank=True, null=True, related_name="children", on_delete=models.CASCADE)
-    name = models.CharField(blank=False, null=False, max_length=50)
-    status = models.CharField(blank=False, null=False, choices=STATUS, max_length=10)
+    id = models.IntegerField(primary_key=True)
+    parent = models.ForeignKey("self", null=True, blank=True,
+                              related_name="children", on_delete=models.CASCADE)
+    name = models.CharField(max_length=50)
+    status = models.CharField(max_length=10, choices=STATUS)
+
     class Meta:
         db_table = "node"
         verbose_name_plural = "nodes"
-
-    def __str__(self):
-        return "Node-{}".format(self.id)
 ```
 
-## Commandline Usage
+---
 
-XLSchema is a built around a plugin framework. Its core features are applied by the `from_uri` subcommand, which converts from xlsx/yaml formats or a db_uri to the implemented xlschema target formats (django models.py, sqlalchemy models, sql files, etc..):
+## Installation
 
-```
-$ python3 -m xlschema --help
-usage: xlschema [-h] [--output OUTPUT] [--prefix PREFIX] [--clean] plugin ...
+### Prerequisites
 
-Round-trip relational model code generation framework.
+- **Python 3.12+**
+- **[uv](https://github.com/astral-sh/uv)** (recommended) or pip
 
-positional arguments:
-  plugin
-    from_uri            Generate model code from URI.
-    echo                Echo command-line options.
-    display             Display available writers.
-    to_sqla             Generate sqlalchemy schemas from databases.
-    split_xlsx          Splits xlsx sheets from a column.
+### From Source
 
-optional arguments:
-  -h, --help            show this help message and exit
-  --output OUTPUT, -o OUTPUT
-                        set output directory (default: None)
-  --prefix PREFIX       set prefix of output (default: None)
-  --clean, -c           clean output dir before generation (default: False)
-
+```bash
+git clone https://github.com/rezayat/xlschema.git
+cd xlschema
+uv sync
+source .venv/bin/activate
 ```
 
-To see the available formats and other options in more detail::
+### Development Setup
 
-```
-$ python3 -m xlschema from_uri --help
-usage: xlschema from_uri [-h] [--run] [--populate] [--update-only]
-                         [--models-only] [--view]
-                         [--table [TABLE [TABLE ...]]] [--sql [SQL [SQL ...]]]
-                         [--format [FORMAT [FORMAT ...]]]
-                         uri
+```bash
+# Install with development dependencies
+uv sync --dev
 
-positional arguments:
-  uri                   uri to operate on
+# Run tests
+uv run pytest
 
-optional arguments:
-  -h, --help            show this help message and exit
-  --run, -r             autorun with all options
-  --populate, -p        populate database
-  --update-only, -u     only gen update code
-  --models-only         only gen model code
-  --view, -v            include views
-  --table [TABLE [TABLE ...]], -t [TABLE [TABLE ...]]
-                        table(s) to dump
-  --sql [SQL [SQL ...]], -s [SQL [SQL ...]]
-                        sql to use for selection
-  --format [FORMAT [FORMAT ...]], -f [FORMAT [FORMAT ...]]
-                        abap/oo, csv/multi, hs/model, hs/persist, hs/schema,
-                        java/hibernate, py/djadmin, py/django, py/djfactories,
-                        py/djfactorytests, py/djmodels, py/djrestviews,
-                        py/djserializers, py/pandas, py/psycopg, py/records,
-                        py/sqlalchemy, r/data, rmd/rmarkdown, rst/sphinx,
-                        scala/hibernate, sql/pgenum, sql/pgschema, sql/pgtap,
-                        sql/postgres, sql/sqlite, xlsx/validation, yml/yaml
+# Run quality checks
+uv run make check
 
+# Generate documentation
+uv run make html
 ```
 
+---
 
-Typical use cases would be as follows:
+## Usage Examples
 
+### From YAML/Excel Files
 
-### From Files (YAML/XLSX)
+```bash
+# Generate all formats from YAML
+python -m xlschema from_uri schema.yml
 
-- Dump schema and data from yaml specification file into all formats
-```
-$ python3 -m xlschema from_uri tests/data/yml/node.yml
-```
+# Generate specific format
+python -m xlschema from_uri --format=py/sqlalchemy schema.xlsx
 
-- Dump schema and data from xlsx specification file into single format
-```
-$ python3 -m xlschema from_uri --format=sql/sqlite tests/data/xlsx/schema.xlsx
-```
+# Generate multiple formats
+python -m xlschema from_uri --format=sql/postgres py/django schema.yml
 
-
-### From Database
-
-- Dump all tables in db into all formats
-```
-$ python3 -m xlschema from_uri sqlite:///data/db/test.sqlite
+# Models only (no data)
+python -m xlschema from_uri --models-only --format=sql/sqlite schema.yml
 ```
 
-- Dump all tables in db into single format
-```
-$ python3 -m xlschema from_uri sqlite:///data/db/test.sqlite --format=sql/sqlite
+### From Database Connections
+
+```bash
+# Export entire database
+python -m xlschema from_uri postgresql://user:pass@host/db
+
+# Export specific tables
+python -m xlschema from_uri sqlite:///app.db --table users orders
+
+# Export SQL query results
+python -m xlschema from_uri sqlite:///app.db --sql "SELECT * FROM active_users"
+
+# Export to specific format
+python -m xlschema from_uri mysql://user:pass@host/db --format=py/djmodels
 ```
 
-- Dump results of sql statements into all formats:
+### API Usage
+
+```python
+from xlschema import XLSchema
+
+# From file
+app = XLSchema('schema.yml', output='./generated')
+app.write('py/sqlalchemy')
+
+# From database
+app = XLSchema('postgresql://user:pass@host/db', models_only=True)
+app.write(['sql/postgres', 'py/django'])
+
+# All available formats
+app.write()  # Generates all supported formats
 ```
-$ python3 -m xlschema from_uri sqlite:///data/db/test.sqlite --sql 'select * from person'
+
+---
+
+## Command Line Interface
+
+### Main Commands
+
+```bash
+# View available plugins
+python -m xlschema --help
+
+# Core code generation
+python -m xlschema from_uri [OPTIONS] URI
+
+# Display available formats
+python -m xlschema display
+
+# Split Excel sheets
+python -m xlschema split_xlsx [OPTIONS] FILE
+
+# Generate SQLAlchemy from database
+python -m xlschema to_sqla [OPTIONS] DATABASE_URI
 ```
 
-- Dump tables into all formats:
+### Core Options
+
+| Option | Description |
+|--------|-------------|
+| `--format, -f` | Output format(s) to generate |
+| `--output, -o` | Output directory (default: `.xlschema/output`) |
+| `--models-only` | Generate only model definitions (no data) |
+| `--table, -t` | Specific table(s) to process |
+| `--sql, -s` | Custom SQL query for data extraction |
+| `--clean, -c` | Clean output directory before generation |
+| `--run, -r` | Auto-run with population and testing |
+
+---
+
+## Supported Formats
+
+### SQL Dialects
+- `sql/postgres` - PostgreSQL with enums and constraints
+- `sql/sqlite` - SQLite with appropriate type mappings
+- `sql/pgenum` - PostgreSQL enum definitions
+- `sql/pgschema` - PostgreSQL schema with relationships
+- `sql/pgtap` - PostgreSQL TAP testing framework
+
+### Python Frameworks
+- `py/django` - Django model definitions
+- `py/djmodels` - Django models with relationships
+- `py/djadmin` - Django admin configurations
+- `py/djfactories` - Factory Boy test factories
+- `py/djserializers` - Django REST Framework serializers
+- `py/sqlalchemy` - SQLAlchemy 2.0 models
+- `py/pandas` - Pandas DataFrame operations
+- `py/psycopg` - Direct psycopg2 operations
+
+### Other Languages
+- `java/hibernate` - Java Hibernate entities
+- `scala/hibernate` - Scala Hibernate entities
+- `hs/model` - Haskell data types
+- `hs/persist` - Haskell Persistent models
+- `hs/schema` - Haskell schema definitions
+
+### Documentation & Data
+- `rst/sphinx` - Sphinx documentation
+- `rmd/rmarkdown` - R Markdown reports
+- `csv/multi` - Multi-table CSV export
+- `xlsx/validation` - Excel validation templates
+- `yml/yaml` - YAML schema export
+
+---
+
+## Configuration
+
+### Environment Variables
+
+```bash
+# Database connection
+export DBI_URI="postgresql://user:pass@host/database"
+
+# Output customization
+export XLSCHEMA_OUTPUT="./models"
+export XLSCHEMA_PREFIX="app_"
 ```
-$ python3 -m xlschema from_uri sqlite:///data/db/test.sqlite --table person vehicle
+
+### Configuration File (`.xlschema/config.yml`)
+
+```yaml
+output_dir: "./generated"
+template_dir: "./custom_templates"
+default_formats:
+  - py/django
+  - sql/postgres
+field_mappings:
+  custom_type: "VARCHAR(255)"
 ```
 
+---
 
-## User Guide and API Documentation
+## Architecture
 
-- See the [userguide](docs/userguide.rst) and the [api](docs/api) if you would just like to use the project.
+XLSchema follows a clean **Reader → Schema → Writer** architecture:
 
-- See the [devguide](docs/devguide.rst) is you would like to contribute or help in the development of the project.
+### Core Components
+
+1. **Readers** (`src/xlschema/readers/`)
+   - `YamlToModel` - YAML file parsing
+   - `ExcelToModel` - Excel (.xlsx) file parsing
+   - `DBToModel` - Database schema introspection
+   - `SqlToModel` - Custom SQL query execution
+
+2. **Schema Model** (`src/xlschema/models.py`)
+   - `Schema` - Container for models and enums
+   - `Model` - Table/entity definitions with fields and relationships
+   - `Enum` - Enumeration type definitions
+   - `Field` - Column definitions with types and constraints
+
+3. **Writers** (`src/xlschema/writers/`)
+   - Template-based code generation using Mako
+   - Format-specific field type mappings
+   - Inheritance hierarchy for shared functionality
+
+4. **Plugin System** (`src/xlschema/plugins/`)
+   - Extensible command-line interface
+   - `CorePlugin` - Main `from_uri` functionality
+   - `DisplayPlugin` - Format discovery
+   - Custom plugin support
+
+---
+
+## Security Features
+
+XLSchema implements enterprise-grade security measures:
+
+### Input Validation
+- **Path Validation**: Prevents directory traversal attacks
+- **URI Validation**: Validates database connection strings
+- **SQL Injection Prevention**: Query analysis and pattern detection
+- **Template Security**: Safe context validation for code generation
+
+### Secure Command Execution
+- **subprocess.run()**: Replaces unsafe `os.system()` calls
+- **Command Validation**: Input sanitization with `shlex.split()`
+- **Timeout Protection**: Prevents hanging processes
+- **Error Handling**: Graceful failure handling
+
+### Template Rendering
+- **Context Filtering**: Prevents code injection in templates
+- **Type Validation**: Strict type checking for template variables
+- **Resource Limits**: Memory and processing constraints
+
+---
+
+## Recent Updates
+
+### Version 0.3.15 (Latest)
+
+**Major Upgrades**
+- **SQLAlchemy 2.0.43**: Complete migration from 1.4.x with modern async support
+- **Python 3.12+**: Updated minimum Python version requirement
+- **UV Package Manager**: Migrated from rye to uv for faster dependency resolution
+
+**Security Enhancements**
+- Comprehensive input validation for all user inputs
+- Secure subprocess execution replacing `os.system()` calls
+- Template rendering security with context validation
+- SQL injection prevention with query analysis
+
+**Bug Fixes**
+- Fixed deprecation warnings from SQLAlchemy 1.4
+- Improved error handling with proper exception hierarchies
+- Enhanced template compatibility with modern Python
+
+**Performance Improvements**
+- Faster database introspection with SQLAlchemy 2.0
+- Optimized template rendering pipeline
+- Reduced memory footprint for large schemas
+
+---
+
+## Contributing
+
+We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
+
+### Development Workflow
+
+1. **Fork** the repository
+2. **Create** a feature branch: `git checkout -b feature/amazing-feature`
+3. **Install** development dependencies: `uv sync --dev`
+4. **Make** your changes with tests
+5. **Run** quality checks: `uv run make check`
+6. **Submit** a pull request
+
+### Code Standards
+
+- **Python 3.12+** compatibility
+- **Type hints** for all public APIs
+- **Comprehensive tests** with pytest
+- **Security-first** approach
+- **Documentation** for new features
+
+---
+
+## Documentation
+
+- **[User Guide](docs/userguide.rst)** - Comprehensive usage documentation
+- **[API Reference](docs/api/)** - Complete API documentation
+- **[Developer Guide](docs/devguide.rst)** - Contributing and architecture
+- **[CLAUDE.md](CLAUDE.md)** - AI assistant integration guide
+- **[Examples](examples/)** - Real-world usage examples
+
+### Building Documentation
+
+```bash
+# HTML documentation
+uv run make html
+
+# PDF documentation
+uv run make pdf
+
+# API documentation
+uv run make api
+```
+
+---
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+---
+
+## Acknowledgments
+
+- **SQLAlchemy Team** - For the excellent ORM framework
+- **Mako** - For the powerful templating engine
+- **Contributors** - Everyone who has contributed to this project
