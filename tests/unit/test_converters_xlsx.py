@@ -15,7 +15,8 @@ def test_empty_xlsx():
     check('test-empty_sqlite.sql')
 
 def test_error_unreadable_format_xlsx():
-    with pytest.raises(SystemExit):
+    from xlschema.common.exceptions import SchemaParsingError
+    with pytest.raises(SchemaParsingError):
         app = get_app('test-error-unreadable-format.xlsx')
 
 def test_error_missing_type_xlsx():
@@ -23,7 +24,8 @@ def test_error_missing_type_xlsx():
         app = get_app('test-error-missing-type.xlsx')
 
 def test_error_no_data_empty_xlsx():
-    with pytest.raises(SystemExit):
+    from xlschema.common.exceptions import SchemaParsingError
+    with pytest.raises(SchemaParsingError):
         app = get_app('test-error-no-data-empty.xlsx')
 
 def test_partial_no_enums_xlsx():

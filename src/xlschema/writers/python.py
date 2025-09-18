@@ -26,7 +26,7 @@ class PythonWriter(SqlWriter):
     def populate(self):
         """Populate from python."""
         self.log.debug('populating: %s', self.path)
-        self.cmd('python {}', self.path)
+        self.cmd('python {}', self.path, fail_ok=True)
 
 
 @register

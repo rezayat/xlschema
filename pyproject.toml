@@ -5,47 +5,37 @@ description = "Generate relational model code from yaml/xlsx/db_uri"
 authors = [
     { name = "Shakeeb Alireza", email = "shakeeb.alireza@rezayat.net" }
 ]
-dependencies = [
-    "colorlog",
-    "mako",
-    "openpyxl",
-    "SQLAlchemy==1.4.31",
-    "PyYAML",
-]
 readme = "README.md"
-requires-python = ">= 3.8"
-
-[build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
-
-[tool.rye]
-managed = true
-dev-dependencies = [
-    "Sphinx==7.3.7",
-    "sphinx-git==11.0.0",
-    "sphinxcontrib-programoutput==0.17",
-    "sphinx-autodoc-typehints==2.2.2",
-    "coverage==7.5.4",
-    "factory-boy==3.3.0",
-    "Faker==26.0.0",
-    "hypothesis==6.104.2",
-    "mock==5.1.0",
-    "pytest==8.2.2",
-    "pytest-cov==5.0.0",
-    "pytest-sugar==1.0.0",
-    "pytest-html==4.1.1",
-    "pytest-mock==3.14.0",
+requires-python = ">=3.12"
+dependencies = [
+    "colorlog>=6.9.0",
+    "mako>=1.3.10",
+    "openpyxl>=3.1.5",
+    "pyyaml>=6.0.2",
+    "sqlalchemy==1.4.54",
 ]
 
-[tool.hatch.metadata]
-allow-direct-references = true
-
-[tool.hatch.build.targets.wheel]
-packages = ["src/xlschema"]
+[dependency-groups]
+dev = [
+    "factory-boy>=3.3.3",
+    "faker>=37.8.0",
+    "hypothesis>=6.139.2",
+    "pytest>=8.4.2",
+    "pytest-cov>=7.0.0",
+    "pytest-html>=4.1.1",
+    "pytest-mock>=3.15.1",
+    "pytest-sugar>=1.1.1",
+    "sphinx>=8.2.3",
+    "sphinx-autodoc-typehints>=3.2.0",
+    "sphinx-git>=11.0.0",
+    "sphinxcontrib-programoutput>=0.18",
+]
 
 [tool.pytest.ini_options]
-markers = [
-    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
-    "serial",
-]
+pythonpath = ["src"]
+testpaths = ["tests"]
+
+
+[build-system]
+requires = ["uv_build>=0.8.18,<0.9.0"]
+build-backend = "uv_build"

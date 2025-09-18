@@ -72,7 +72,7 @@ class PostgresWriter(SqlWriter):
     def populate(self):
         """Load postgresql file directly into database."""
         self.log.debug('populating: %s', self.path)
-        self.cmd('psql -f {}', self.path)
+        self.cmd('psql -f {}', self.path, fail_ok=True)
 
     def process(self, row):
         """Use for postgres row by row copy operations."""
@@ -151,7 +151,7 @@ class PgTapWriter(PostgresWriter):
     def test(self):
         """Run test."""
         self.log.debug('testing %s', self.path)
-        self.cmd('pg_prove {}', self.path)
+        self.cmd('pg_prove {}', self.path, fail_ok=True)
 
     def run(self):
         """Default run method."""
@@ -172,4 +172,4 @@ class SqliteWriter(SqlWriter):
         sqlite_db = os.path.join(self.options.output,
                                  '{}_{}.db'.format(self.schema.name,
                                                    self.method))
-        self.cmd('sqlite3 {} < {}', sqlite_db, self.path)
+        self.cmd('sqlite3 {} < {}', sqlite_db, self.path, fail_ok=True)

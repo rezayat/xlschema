@@ -66,7 +66,9 @@ class ExcelToModel(abstract.SchemaReader):
                     self._add_model_sheet(sheet, sheets.DataSheet)
 
                 else:
-                    self.log.critical('Cannot parse %s', self.uri)
-                    sys.exit(1)
+                    from ...common.exceptions import SchemaParsingError
+                    error_msg = f'Cannot parse Excel file - unrecognized format in sheet "{name}"'
+                    self.log.critical(error_msg)
+                    raise SchemaParsingError(error_msg, file_path=self.uri, sheet_name=name)
 
         self.post_process(self.workbook.sheetnames)

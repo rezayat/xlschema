@@ -126,7 +126,7 @@ class DependencyManager(object):
     def load_file(self, path):
         """Load single sql file into postgres."""
         if os.path.exists(path) and path.endswith('.sql'):
-            self.cmd('psql -f {}'.format(path))
+            self.cmd('psql -f {}'.format(path), fail_ok=True)
         else:
             self.log.error('cannot load %s', path)
 
@@ -136,10 +136,61 @@ class DependencyManager(object):
             target = os.path.join(path, filename)
             self.load_file(target)
 
-    def cmd(self, shell_cmd):
-        """Run and log shell command."""
-        self.log.debug(shell_cmd)
-        os.system(shell_cmd)
+    def cmd(self, shell_cmd, fail_ok=True):
+        """Run and log shell command securely.
+
+        :param shell_cmd: shell command string to execute
+        :param fail_ok: if True, don't raise exceptions on command failure
+        :raises subprocess.CalledProcessError: if command fails and fail_ok=False
+        :raises ValueError: if command is invalid
+        """
+        self.log.debug("Executing command: %s", shell_cmd)
+
+        try:
+            # Use shlex.split for safe command parsing
+            import shlex
+            import subprocess
+
+            cmd_args = shlex.split(shell_cmd)
+            result = subprocess.run(
+                cmd_args,
+                check=False,  # Handle manually
+                capture_output=True,
+                text=True,
+                timeout=300  # 5 minute timeout
+            )
+
+            if result.returncode == 0:
+                if result.stdout:
+                    self.log.debug("Command output: %s", result.stdout.strip())
+                return result
+            else:
+                error_msg = f"Command failed with exit code {result.returncode}: {result.stderr.strip()}"
+                if fail_ok:
+                    self.log.warning("Command failed (ignoring): %s", error_msg)
+                    return result
+                else:
+                    self.log.error(error_msg)
+                    raise subprocess.CalledProcessError(
+                        result.returncode, cmd_args, result.stdout, result.stderr
+                    )
+
+        except subprocess.TimeoutExpired as e:
+            error_msg = f"Command timed out after {e.timeout} seconds"
+            if fail_ok:
+                self.log.warning("Command timed out (ignoring): %s", error_msg)
+                return None
+            else:
+                self.log.error(error_msg)
+                raise
+        except (OSError, FileNotFoundError) as e:
+            error_msg = f"Invalid command: {e}"
+            if fail_ok:
+                self.log.warning("Command not found (ignoring): %s", error_msg)
+                return None
+            else:
+                self.log.error(error_msg)
+                raise ValueError(error_msg)
 
 
 # if __name__ == '__main__':

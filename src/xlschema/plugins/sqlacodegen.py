@@ -40,6 +40,6 @@ class SqlaCodegenPlugin(Plugin):
         _cmd += ' --outfile {} {}'.format(
             os.path.join(self.options.output, outfile),
             self.options.uri)
-        self.cmd(_cmd)
+        self.cmd(_cmd, fail_ok=True)
 
         self.store['success'] = True

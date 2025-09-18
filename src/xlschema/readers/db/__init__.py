@@ -104,19 +104,32 @@ class SqlToModel(abstract.SchemaReader):
 
     def process(self):
         """Main process to execute sql into models."""
+        from ...common.validation import validate_sql_query, ValidationError
+
         for i, sql in enumerate(self.options.sql):
-            self.log.debug('executing: %s', sql)
+            # Validate SQL query for security
+            try:
+                validated_sql = validate_sql_query(sql)
+                self.log.debug('executing: %s', validated_sql[:100] + '...' if len(validated_sql) > 100 else validated_sql)
+            except ValidationError as e:
+                self.log.error("Invalid SQL query: %s", e)
+                raise
+
+            session = None
             try:
                 session = self.session_factory()
-                print('sql:', sql)
-                rows = session.execute(sql)
-                self.populate(i, sql, rows)
+                self.log.debug('sql: %s', validated_sql)
+                rows = session.execute(validated_sql)
+                self.populate(i, validated_sql, rows)
                 session.commit()
-            except:  # noqa: E722
-                session.rollback()
+            except Exception as e:
+                if session:
+                    session.rollback()
+                self.log.error("SQL execution failed: %s", e)
                 raise
             finally:
-                session.close()
+                if session:
+                    session.close()
 
         model_names = [model.name for model in self.schema.models]
         self.log.debug('model_names: %s', model_names)

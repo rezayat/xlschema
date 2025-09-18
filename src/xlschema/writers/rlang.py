@@ -29,7 +29,7 @@ class RMarkdownWriter(TemplateWriter):
     def report(self):
         """Render report from code."""
         self.log.debug('rendering to report %s', self.path)
-        self.cmd('renderRmd {}', self.path)
+        self.cmd('renderRmd {}', self.path, fail_ok=True)
 
 
 @register
@@ -48,4 +48,4 @@ class RlangWriter(TemplateWriter):
     def report(self):
         """Render report from code."""
         self.log.debug('rendering to report %s', self.path)
-        self.cmd('renderRmd {}', self.path)
+        self.cmd('renderRmd {}', self.path, fail_ok=True)

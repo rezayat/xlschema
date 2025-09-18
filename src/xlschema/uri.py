@@ -6,6 +6,7 @@ import sqlalchemy
 from sqlalchemy.engine.url import make_url
 
 from .common import utils
+from .common.validation import validate_uri, ValidationError
 
 
 class URIParser:
@@ -16,15 +17,23 @@ class URIParser:
 
         :param uri: Uniform resource identifier.
         :type uri: str
+        :raises ValidationError: if URI is invalid or unsafe
         """
-        self.uri = uri
+        self.log = logging.getLogger(self.__class__.__name__)
+
+        # Validate URI first for security
+        try:
+            self.uri = validate_uri(uri)
+        except ValidationError as e:
+            self.log.error("Invalid URI provided: %s", e)
+            raise
+
         self.type = None  # xlsx|yaml|database
 
         # if type == db
         self.db_uri = None  # parsed uri
         self.db_type = None
 
-        self.log = logging.getLogger(self.__class__.__name__)
         self.parse()
 
     def parse(self):

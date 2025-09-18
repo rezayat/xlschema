@@ -9,11 +9,11 @@ Installation
 ```
 $ git clone https://github.com/rezayat/xlschema.git
 $ cd xlschema
-$ rye sync
+$ uv sync
 $ source .venv/bin/activate
 ```
 
-xlschema uses [rye](https://rye.astral.sh/guide/) as development tool.
+xlschema uses [uv](https://github.com/astral-sh/uv) as development tool.
 
 View the [YAML](http://yaml.org) at `tests/data/yml/node.yml` using your preferred text editor:
 

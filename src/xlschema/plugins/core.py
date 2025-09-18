@@ -1,4 +1,5 @@
 """Core XLSchema plugin."""
+import argparse
 import os
 
 from .. import XLSchema
@@ -31,8 +32,19 @@ class CorePlugin(Plugin):
         option('--table', '-t', nargs='*', help="table(s) to dump")
         option('--sql', '-s', nargs='*', help='sql to use for selection')
 
-        # multi-string options
-        option('--format', '-f', type=str, nargs='*', help=cls.FORMATS)
+        # multi-string options with basic validation
+        def validate_single_format(value):
+            from ..common.validation import validate_format_string, ValidationError
+            try:
+                # Only do basic pattern validation, not strict format checking for backward compatibility
+                return validate_format_string(value, allowed_formats=None)
+            except ValidationError as e:
+                # For backward compatibility, log warning but don't fail
+                import logging
+                logging.getLogger('xlschema.plugins.core').warning(f"Format validation warning: {e}")
+                return value
+
+        option('--format', '-f', type=validate_single_format, nargs='*', help=cls.FORMATS)
 
         # required
         option('uri', help="uri to operate on")
