@@ -46,3 +46,6 @@ wheels/
 
 # rye
 *.lock
+
+*.sqlite
+
